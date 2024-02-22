@@ -11,6 +11,10 @@ app.get('/hello',(req,res) => {
 app.post('/hello',(req, res)=>{
   res.send(`HELLO ${req.body.name}`)
 });
+
+app.get('/hello/:name', (req,res)=>{
+    res.send(`Hello! ${req.params.name}`)
+});
 app.listen(8001,() => {
     console.log('server is listening on port 8001');
 })
