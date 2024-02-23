@@ -1,5 +1,6 @@
 import express, { response } from "express";
 import bodyParser from "body-parser";
+import { MongoClient } from "mongodb";
 
 const products = [{
     id: '123',
@@ -51,7 +52,7 @@ const products = [{
     imageUrl: './assets/shoesImage7.jpg',
     averageRating: '5.0',
   }, {
-    id: '890',
+    id: '893',
     name: 'Classic Shoes',
     price: '40.00',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel enim quam. Mauris nisl tellus, fringilla sed cursus eu, convallis non diam. Mauris quis fringilla nunc. Aenean leo lacus, lobortis sit amet venenatis a, aliquet tristique erat. Etiam laoreet mauris ut dapibus tincidunt. Pellentesque non ex at nisl ornare aliquam sed non ante. Nam lobortis magna id massa cursus, sit amet condimentum metus facilisis. Donec eu tortor at est tempor cursus et sed velit. Morbi rutrum elementum est vitae fringilla. Phasellus dignissim purus turpis, ac varius enim auctor vulputate. In ullamcorper vestibulum mauris. Nulla malesuada pretium mauris, lobortis eleifend dolor iaculis vitae.',
@@ -66,7 +67,7 @@ const products = [{
     averageRating: '5.0',
   },
   {
-    id: '901',
+    id: '902',
     name: 'Teal Dress Shoes',
     price: '330.00',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel enim quam. Mauris nisl tellus, fringilla sed cursus eu, convallis non diam. Mauris quis fringilla nunc. Aenean leo lacus, lobortis sit amet venenatis a, aliquet tristique erat. Etiam laoreet mauris ut dapibus tincidunt. Pellentesque non ex at nisl ornare aliquam sed non ante. Nam lobortis magna id massa cursus, sit amet condimentum metus facilisis. Donec eu tortor at est tempor cursus et sed velit. Morbi rutrum elementum est vitae fringilla. Phasellus dignissim purus turpis, ac varius enim auctor vulputate. In ullamcorper vestibulum mauris. Nulla malesuada pretium mauris, lobortis eleifend dolor iaculis vitae.',
@@ -74,7 +75,7 @@ const products = [{
     averageRating: '5.0',
   },
   {
-    id: '789',
+    id: '788',
     name: 'Fancy Boots',
     price: '230.00',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel enim quam. Mauris nisl tellus, fringilla sed cursus eu, convallis non diam. Mauris quis fringilla nunc. Aenean leo lacus, lobortis sit amet venenatis a, aliquet tristique erat. Etiam laoreet mauris ut dapibus tincidunt. Pellentesque non ex at nisl ornare aliquam sed non ante. Nam lobortis magna id massa cursus, sit amet condimentum metus facilisis. Donec eu tortor at est tempor cursus et sed velit. Morbi rutrum elementum est vitae fringilla. Phasellus dignissim purus turpis, ac varius enim auctor vulputate. In ullamcorper vestibulum mauris. Nulla malesuada pretium mauris, lobortis eleifend dolor iaculis vitae.',
@@ -99,11 +100,28 @@ const products = [{
 const app = express();
 app.use(bodyParser.json());
 
-app.get('/api/products',(req,res)=>{
+// const client = await MongoClient.connect(
+//    "mongodb+srv://goswamiprashansa:qf7lctSJo60T0py5@cluster0.fl9dz6a.mongodb.net/",
+//    {useNewUrlParser:true, useUnifiedTopology:true}
+// );
+// const db = client.db('e-comm');
+
+app.get('/api/products', async(req,res)=>{
+    const client = await MongoClient.connect(
+        "mongodb+srv://goswamiprashansa:qf7lctSJo60T0py5@cluster0.fl9dz6a.mongodb.net/",
+        {useNewUrlParser:true, useUnifiedTopology:true}
+     );
+     const db = client.db('e-comm');
+    
+    const products = await db.collection('products').find({}).toArray();
     res.status(200).json(products);
+    client.close();
 });
 
 app.get('/api/users/:userId/cart',(req,res)=>
+
+
+ 
   {res.status(200).json(cartItems)}
 );
 
@@ -123,7 +141,7 @@ app.post('/api/users/:userId/cart',(req,res)=>{
     const product =products.find(product => product.id === productId)
     if(product){
         cartItems.push(product);
-        res.status(200).json(cartItems);
+        res.status(200).json(cartItems);    
     }else{
         res.status(404).json('Could not find a product!');
     }
