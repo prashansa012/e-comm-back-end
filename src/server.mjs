@@ -106,8 +106,9 @@ app.use(bodyParser.json());
 // );
 // const db = client.db('e-comm');
 
+
 app.get('/api/products', async(req,res)=>{
-    const client = await MongoClient.connect(
+    try{  const client = await MongoClient.connect(
         "mongodb+srv://goswamiprashansa:qf7lctSJo60T0py5@cluster0.fl9dz6a.mongodb.net/",
         {useNewUrlParser:true, useUnifiedTopology:true}
      );
@@ -116,18 +117,52 @@ app.get('/api/products', async(req,res)=>{
     const products = await db.collection('products').find({}).toArray();
     res.status(200).json(products);
     client.close();
+    }
+    catch(error){
+        console.log(error);
+    }
 });
 
-app.get('/api/users/:userId/cart',(req,res)=>
+
+app.get('/api/users/:userId/cart', async(req,res)=>{
+   try{
+    const {userId}=req.params;
+    console.log({userId})
+    const client = await MongoClient.connect(
+    "mongodb+srv://goswamiprashansa:qf7lctSJo60T0py5@cluster0.fl9dz6a.mongodb.net/",
+    {useNewUrlParser:true, useUnifiedTopology:true}
+    );
+     const db = client.db('e-comm');
+     const user = await db.collection('users').find({id: userId});
+     console.log(user );
+     if(!user)return res.status(404).json("Could not find user!");
+      const products= await db.collection('products').find({}).toArray();
+      const cartItemIds=user.cartItems;
+      // console.log(cartItemIds)
+      // const cartItems= cartItemIds.map(id =>
+      // products.find(product => product.id ===id));
+      res.status(200).json(cartItems)
+     client.close();}
+     catch(error){
+      console.log(error)
+     }
+  });
+   
+    
+    
 
 
- 
-  {res.status(200).json(cartItems)}
-);
 
-app.get('/api/products/:productId',(req ,res)=>{
-    const {productId}=req.params;
-    const product = products.find((product) => product.id === productId);
+app.get('/api/products/:productId',async(req ,res)=>{
+    let {productId}=req.params;
+    productId=parseInt(productId);
+     const client = await MongoClient.connect(
+    "mongodb+srv://goswamiprashansa:qf7lctSJo60T0py5@cluster0.fl9dz6a.mongodb.net/",
+    {useNewUrlParser:true, useUnifiedTopology:true}
+    );
+     const db = client.db('e-comm');
+    const product =await db.collection('products').findOne({id:productId});
+    console.log(product);
     if(product){
         res.status(200).json(product);
     
@@ -153,6 +188,6 @@ app.delete('/api/users/:userId/cart/:productId',(req, res)=>{
     res.status(200).json(cartItems);
 })
 
-app.listen(8001,() => {
+app.listen(8005,() => {
     console.log('server is listening on port 8001 !!');
 })
